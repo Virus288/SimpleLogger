@@ -1,9 +1,6 @@
 # Dependencies
 node_modules/
 
-# Transpiled files
-lib/
-
 # VS Code
 .vscode
 !.vscode/tasks.js
