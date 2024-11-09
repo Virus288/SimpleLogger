@@ -1,6 +1,3 @@
-Napisz że wiadomości bez messages sie nie pojawią, chyba że w time. Dodatkowo zrób przykłady działania
-Napisz że stacki z błędów nie są logowane, ale błędy same w sobie już tak
-
 # SimpleLogger
 
 This project is simple logger for node.js. It utilizes winston under the hood
