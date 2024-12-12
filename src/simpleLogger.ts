@@ -7,6 +7,7 @@ import errLogger from './logger.js';
  */
 export default class Log {
   private static _counter: { target: string; start: number }[] = [];
+  private static _prefix: string | null = null;
 
   private static get counter(): { target: string; start: number }[] {
     return this._counter;
@@ -14,6 +15,14 @@ export default class Log {
 
   private static set counter(val: { target: string; start: number }[]) {
     this._counter = val;
+  }
+
+  private static get prefix(): string | null {
+    return Log._prefix;
+  }
+
+  private static set prefix(prefix: string) {
+    Log._prefix = prefix;
   }
 
   /**
@@ -26,6 +35,14 @@ export default class Log {
     const m = date.getMinutes().toString().length === 1 ? `0${date.getMinutes()}:` : `${date.getMinutes()}:`;
     const s = date.getSeconds().toString().length === 1 ? `0${date.getSeconds()}` : `${date.getSeconds()}`;
     return `${h}${m}${s}`;
+  }
+
+  /**
+   * Set prefix for logs location. Useful if you want to group all logs from 1 project into 1 location.
+   * @param prefix Prefix to use.
+   */
+  static setPrefix(prefix: string): void {
+    this.prefix = prefix;
   }
 
   /**
@@ -494,20 +511,21 @@ export default class Log {
    */
   private static saveLog(message: unknown, type: enums.ELogTypes): void {
     const mess = typeof message !== 'string' ? JSON.stringify(message, null, 2) : message;
+    const logger = errLogger(this.prefix);
 
     switch (type) {
       case enums.ELogTypes.Warn:
-        errLogger.warn(mess);
+        logger.warn(mess);
         return;
       case enums.ELogTypes.Error:
-        errLogger.error(mess);
+        logger.error(mess);
         return;
       case enums.ELogTypes.Debug:
-        errLogger.debug(mess);
+        logger.debug(mess);
         return;
       case enums.ELogTypes.Log:
       default:
-        errLogger.info(mess);
+        logger.info(mess);
     }
   }
 
