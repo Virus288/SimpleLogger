@@ -3,13 +3,21 @@
  */
 export default class Log {
     private static _counter;
+    private static _prefix;
     private static get counter();
     private static set counter(value);
+    private static get prefix();
+    private static set prefix(value);
     /**
      * Get current date.
      * @returns Formatted date for log files.
      */
     private static getDate;
+    /**
+     * Set prefix for logs location. Useful if you want to group all logs from 1 project into 1 location.
+     * @param prefix Prefix to use.
+     */
+    static setPrefix(prefix: string): void;
     /**
      * Log new error.
      * @param target Log target used as prefix for log.
