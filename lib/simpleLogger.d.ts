@@ -1,11 +1,15 @@
+import * as enums from './enums/index.js';
 /**
  * Log passed data and save it in local files.
  */
 export default class Log {
     private static _counter;
     private static _prefix;
+    private static _logRules;
     private static get counter();
     private static set counter(value);
+    private static get logRules();
+    private static set logRules(value);
     private static get prefix();
     private static set prefix(value);
     /**
@@ -13,6 +17,15 @@ export default class Log {
      * @returns Formatted date for log files.
      */
     private static getDate;
+    /**
+     * Sets a rule for logs. If the rule returns true, the log will be shown; otherwise, it will not.
+     * This is useful for adding additional rules to control logging behavior in production environments.
+     * This rule will only be used to validate messages. Targets will not be validated.
+     * If param used in this logger is not a string, it will be JSON.stringify. Keep this in mind, that certain params like full error objects might not work.
+     * @param rule The rule to validate logs against.
+     * @param target The log type to which this rule should be assigned.
+     */
+    static setLogRule(rule: (log: string) => boolean, target: enums.ELogTypes): void;
     /**
      * Set prefix for logs location. Useful if you want to group all logs from 1 project into 1 location.
      * @param prefix Prefix to use.

@@ -8,7 +8,7 @@ TLDR;
 
 ## 1. Use this package
 
-### General introduction
+### 1.1 General introduction
 
 This package only supports node.js and will not work on frontend. You can modify it and exclude winston for it to work.
 
@@ -28,7 +28,7 @@ Will output data in terminal like this
 ```
 
 And save it in logs using winston:
-```
+```log
 [2024-11-08T18:05:03.311Z] info: I am doing something
 ```
 
@@ -68,7 +68,7 @@ Error is used to mark errors. Currently pushing full error object does not log t
 ```ts
 function dosomething(anothernumber) {
     const icandomath = 1+anothernumber
-    if(icandomath > 2) log.warn('numner', 'number is above 2. this can break in the future!')
+    if(icandomath > 2) log.warn('Number', 'Number is above 2. this can break in the future!')
     return icandomath
 }
 ```
@@ -96,7 +96,7 @@ function doSomething() {
 }
 ```
 
-Debug is a debugging log, which is disabled in console and files, while your application is in production mode ( based on NODE_ENV ). This log is intended to show additional debugging data in development / tests
+Debug is a debugging log, which is disabled in console and files, while your application is in production mode ( based on NODE_ENV === `production` ). This log is intended to show additional debugging data in development / tests
 
 - Time
 ```ts
@@ -112,7 +112,7 @@ Time will count time between `time` and `endTime` methods. Remember, that 'targe
 
 #### Decorators
 
-Decorators are marked for async and sync functions, because I am unable to properly type those.
+Decorators are marked for async and sync functions, because I am unable to properly type those. Every decorator will trigger after function is finished
 
 There are multiple log types. In no particular order:
 
@@ -137,7 +137,7 @@ async function doSomething() {
 
 - Sync error
 ```ts
-@Log.decorateSyncError('This function should not be run!')
+@Log.decorateSyncError('Finished doSomething. This function should not run!')
 function doSomething() {
     const iCanDoMath = 1+1
     return iCanDoMath
@@ -146,7 +146,7 @@ function doSomething() {
 
 - Async error
 ```ts
-@Log.decorateError('This function should not run!')
+@Log.decorateError('Finished doSomethhing. This function should not run!')
 async function doSomething() {
     return new Promise(resolve => {
         resolve(2)
@@ -156,7 +156,7 @@ async function doSomething() {
 
 - Sync warn
 ```ts
-@Log.decorateSyncWarn('This function should not be run!')
+@Log.decorateSyncWarn('Finished doSomething. This function might change in the future!')
 function doSomething() {
     const iCanDoMath = 1+1
     return iCanDoMath
@@ -165,7 +165,7 @@ function doSomething() {
 
 - Async warn
 ```ts
-@Log.decorateWarn('This function should not run!')
+@Log.decorateWarn('Finished doSomething. This function might change in the future!')
 async function doSomething() {
     return new Promise(resolve => {
         resolve(2)
@@ -194,7 +194,7 @@ async function doSomething() {
 
 - Sync debug
 ```ts
-@Log.decorateSyncDebug('I am debugging here')
+@Log.decorateSyncDebug('Debbuging that doSomething just finished')
 function doSomething() {
     const iCanDoMath = 1+1
     return iCanDoMath
@@ -203,7 +203,7 @@ function doSomething() {
 
 - Async debug
 ```ts
-@Log.decorateDebug('I am debugging here')
+@Log.decorateDebug('Debbuging that doSomething just finished')
 async function doSomething() {
     return new Promise(resolve => {
         resolve(2)
@@ -230,6 +230,15 @@ async function doSomething() {
 }
 ```
 
+- Sync debug time
+```ts
+@Log.decorateDebugSyncTime('Just finished doing something. This will not show up in production')
+function doSomething() {
+    const iCanDoMath = 1+1
+    return iCanDoMath
+}
+```
+
 - Async debug time
 ```ts
 @Log.decorateDebugTime('Just finished doing something. This will not show up in production')
@@ -240,14 +249,89 @@ async function doSomething() {
 }
 ```
 
-- Sync debug time
-```ts
-@Log.decorateDebugSyncTime('Just finished doing something. This will not show up in production')
-async function doSomething() {
-    return new Promise(resolve => {
-        resolve(2)
-    })
+### 1.2 Saves logs location
+
+All logs are saved in files.
+
+#### On linux
+
+```text
+~/.cache/"package.json -> productName"/logs
+```
+
+#### On windows
+
+```text
+~/AppData/Roaming/"package.json -> productName"/logs
+```
+
+You can also trigger function 
+
+
+```js
+Log.setPrefix('test');
+```
+
+### 1.3 Prefix in saved logs
+
+Above function will group all logs from your app under folder `test`. Example:
+This app will prioretize env `APP_NAME`. If its not set, `name` in your package.json will be used as your log. Lets say that your `name` is "Authorizations" and APP_NAME is not set
+
+- No prefix set
+```
+~/.cache/Authroizations/logs
+```
+
+- Prefix set to `test`
+```
+~/.cache/test/Authroizations/logs
+```
+
+### 1.4 Validation rules
+
+This logger includes validation rules, which can be used to disable certain logs. 
+
+```js
+const validateLog = (log) => {
+    if(log.includes('test')) return false
+    return true
 }
+
+Log.setLogRule(validateLog, ELogTypes.Error)
+```
+
+Above function is a basic example of disabling all error logs, which include 'test' in message. More realistic usage can be:
+
+```js
+function doSomething() {
+    Log.debug('I am doing something')
+
+    try {
+        doSomethingElse()
+    } catch(err) {
+        Log.error('DoSomething', `We got an error! ${err.message}, code: ${err.code}`)
+    }
+}
+
+const validateLog = (log) => {
+    if(/\d/.test(log)) return false
+    return true
+}
+
+Log.setLogRule(validateLog, ELogTypes.Error)
+```
+
+In above example, I am using debug log, which will not show up in production, but I am also using error, which will show in production. 
+Errors that I throw include additional field "code", which defines what kind of error was thrown. If I do not care to see errors thrown by me and I only want to see unexpected errors, I can disable errors logging for errors with code.
+Without above rule, I would get 2 logs
+```log
+[2024-11-08T18:05:03.311Z] error: We got an error! Email was not provided, code: 22 
+[2024-11-08T18:05:03.311Z] error: We got an error! Cannot read property of undefined, reading 'something', code:
+```
+
+With above rule:
+```log
+[2024-11-08T18:05:03.311Z] error: We got an error! Cannot read property of undefined, reading 'something', code:
 ```
 
 ## 2. Work on this project
@@ -259,8 +343,6 @@ async function doSomething() {
 ```shell
 npm install / yarn
 ```
-
-#### Prepare environment
 
 ### 2.2. How to build
 
@@ -276,20 +358,4 @@ After compiling this code, you can also run
 npm run build:common / yarn build:common
 ```
 
-Above command will transpile compiled code into commonJS files, which will work in non-esm projects 
-
-### 2.3. Useful information
-
-#### 2.3.1 Logs folder, where every log from this application is stored. You can change it in `src/tools/logger/logger.ts`
-
-##### Linux
-
-```text
-~/.cache/"package.json -> productName"/logs
-```
-
-##### Windows
-
-```text
-~/AppData/Roaming/"package.json -> productName"/logs
-```
+Above command will transpile compiled code into commonJS files, which will work in non-esm projects. Make sure to run this after every build, unless you do not work with commonJS
