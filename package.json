@@ -1,6 +1,6 @@
 {
   "name": "simpleLogger",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Simple node.js logger",
   "productName": "simpleLogger",
   "author": "https://github.com/Virus288",
@@ -38,7 +38,7 @@
     "lintStaged": "npx lint-staged"
   },
   "dependencies": {
-    "chalk": "5.4.1",
+    "chalk": "4.1.2",
     "winston": "3.17.0",
     "winston-daily-rotate-file": "5.0.0"
   },
