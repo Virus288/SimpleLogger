@@ -8,6 +8,7 @@ import errLogger from './logger.js';
 export default class Log {
   private static _counter: { target: string; start: number }[] = [];
   private static _prefix: string | null = null;
+  private static _logRules: Map<enums.ELogTypes, (log: string) => boolean> = new Map();
 
   private static get counter(): { target: string; start: number }[] {
     return this._counter;
@@ -15,6 +16,14 @@ export default class Log {
 
   private static set counter(val: { target: string; start: number }[]) {
     this._counter = val;
+  }
+
+  private static get logRules(): Map<enums.ELogTypes, (log: string) => boolean> {
+    return this._logRules;
+  }
+
+  private static set logRules(val: Map<enums.ELogTypes, (log: string) => boolean>) {
+    this._logRules = val;
   }
 
   private static get prefix(): string | null {
@@ -35,6 +44,18 @@ export default class Log {
     const m = date.getMinutes().toString().length === 1 ? `0${date.getMinutes()}:` : `${date.getMinutes()}:`;
     const s = date.getSeconds().toString().length === 1 ? `0${date.getSeconds()}` : `${date.getSeconds()}`;
     return `${h}${m}${s}`;
+  }
+
+  /**
+   * Sets a rule for logs. If the rule returns true, the log will be shown; otherwise, it will not.
+   * This is useful for adding additional rules to control logging behavior in production environments.
+   * This rule will only be used to validate messages. Targets will not be validated.
+   * If param used in this logger is not a string, it will be JSON.stringify. Keep this in mind, that certain params like full error objects might not work.
+   * @param rule The rule to validate logs against.
+   * @param target The log type to which this rule should be assigned.
+   */
+  static setLogRule(rule: (log: string) => boolean, target: enums.ELogTypes): void {
+    Log.logRules.set(target, rule);
   }
 
   /**
@@ -500,6 +521,11 @@ export default class Log {
    * @param message Messages to save.
    */
   private static buildLog(color: () => string, type: enums.ELogTypes, message: unknown): void {
+    if (Log.logRules.get(type)) {
+      const shouldLog = Log.logRules.get(type)!(Log.toString(message));
+      if (typeof shouldLog === 'boolean' && shouldLog === false) return;
+    }
+
     console.info(`[${chalk.gray(Log.getDate())}] ${color()} ${Log.toString(message)}`);
     Log.saveLog(message, type);
   }
