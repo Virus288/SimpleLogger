@@ -38,7 +38,7 @@ export default [
     files: ['src/**/*.ts', 'src/**/**.*.json'],
   })),
   {
-    ignores: ['lib/**/*.js', '*.js', 'eslint.config.mjs'],
+    ignores: ['lib', '*.js', 'eslint.config.mjs'],
   },
   {
     files: ['src/**/*.ts'],
