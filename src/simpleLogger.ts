@@ -11,27 +11,11 @@ export default class Log {
   private static _logRules: Map<enums.ELogTypes, (log: string) => boolean> = new Map();
 
   private static get counter(): { target: string; start: number }[] {
-    return this._counter;
+    return Log._counter;
   }
 
   private static set counter(val: { target: string; start: number }[]) {
-    this._counter = val;
-  }
-
-  private static get logRules(): Map<enums.ELogTypes, (log: string) => boolean> {
-    return this._logRules;
-  }
-
-  private static set logRules(val: Map<enums.ELogTypes, (log: string) => boolean>) {
-    this._logRules = val;
-  }
-
-  private static get prefix(): string | null {
-    return Log._prefix;
-  }
-
-  private static set prefix(prefix: string) {
-    Log._prefix = prefix;
+    Log._counter = val;
   }
 
   /**
@@ -63,7 +47,19 @@ export default class Log {
    * @param prefix Prefix to use.
    */
   static setPrefix(prefix: string): void {
-    this.prefix = prefix;
+    Log.prefix = prefix;
+  }
+
+  private static get logRules(): Map<enums.ELogTypes, (log: string) => boolean> {
+    return Log._logRules;
+  }
+
+  private static get prefix(): string | null {
+    return Log._prefix;
+  }
+
+  private static set prefix(prefix: string) {
+    Log._prefix = prefix;
   }
 
   /**
@@ -537,7 +533,7 @@ export default class Log {
    */
   private static saveLog(message: unknown, type: enums.ELogTypes): void {
     const mess = typeof message !== 'string' ? JSON.stringify(message, null, 2) : message;
-    const logger = errLogger(this.prefix);
+    const logger = errLogger(Log.prefix);
 
     switch (type) {
       case enums.ELogTypes.Warn:
