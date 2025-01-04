@@ -8,10 +8,6 @@ export default class Log {
     private static _logRules;
     private static get counter();
     private static set counter(value);
-    private static get logRules();
-    private static set logRules(value);
-    private static get prefix();
-    private static set prefix(value);
     /**
      * Get current date.
      * @returns Formatted date for log files.
@@ -31,6 +27,9 @@ export default class Log {
      * @param prefix Prefix to use.
      */
     static setPrefix(prefix: string): void;
+    private static get logRules();
+    private static get prefix();
+    private static set prefix(value);
     /**
      * Log new error.
      * @param target Log target used as prefix for log.
