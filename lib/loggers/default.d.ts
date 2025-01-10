@@ -1,13 +1,16 @@
-import * as enums from './enums/index.js';
+import * as enums from '../enums/index.js';
 /**
  * Log passed data and save it in local files.
  */
 export default class Log {
     private static _counter;
     private static _prefix;
+    private static _styleJson;
     private static _logRules;
     private static get counter();
     private static set counter(value);
+    private static get styleJson();
+    private static set styleJson(value);
     /**
      * Get current date.
      * @returns Formatted date for log files.
@@ -30,6 +33,14 @@ export default class Log {
     private static get logRules();
     private static get prefix();
     private static set prefix(value);
+    /**
+     * Add spaces to json stringify.
+     * Setting this to false will simply stringify logs in files without formatting them to more readable state.
+     * This is usefull, for when you have custom gui for logs like gcp. This will make logs more readable.
+     * Default val: true.
+     * @param val Boolean marking if json should include spaces.
+     */
+    static formatJson(val: boolean): void;
     /**
      * Log new error.
      * @param target Log target used as prefix for log.
@@ -183,16 +194,4 @@ export default class Log {
      * @param message Messages to save.
      */
     private static buildLog;
-    /**
-     * Save log in files.
-     * @param message Message to save.
-     * @param type Category of log.
-     */
-    private static saveLog;
-    /**
-     * Stringify log.
-     * @param message Stringify message to save it.
-     * @returns Stringified log.
-     */
-    private static toString;
 }

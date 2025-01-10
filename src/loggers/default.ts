@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import * as enums from './enums/index.js';
-import errLogger from './logger.js';
+import Utils from './utils.js';
+import * as enums from '../enums/index.js';
 
 /**
  * Log passed data and save it in local files.
@@ -8,6 +8,7 @@ import errLogger from './logger.js';
 export default class Log {
   private static _counter: { target: string; start: number }[] = [];
   private static _prefix: string | null = null;
+  private static _styleJson: boolean = true;
   private static _logRules: Map<enums.ELogTypes, (log: string) => boolean> = new Map();
 
   private static get counter(): { target: string; start: number }[] {
@@ -16,6 +17,14 @@ export default class Log {
 
   private static set counter(val: { target: string; start: number }[]) {
     Log._counter = val;
+  }
+
+  private static get styleJson(): boolean {
+    return Log._styleJson;
+  }
+
+  private static set styleJson(val: boolean) {
+    Log._styleJson = val;
   }
 
   /**
@@ -60,6 +69,17 @@ export default class Log {
 
   private static set prefix(prefix: string) {
     Log._prefix = prefix;
+  }
+
+  /**
+   * Add spaces to json stringify.
+   * Setting this to false will simply stringify logs in files without formatting them to more readable state.
+   * This is usefull, for when you have custom gui for logs like gcp. This will make logs more readable.
+   * Default val: true.
+   * @param val Boolean marking if json should include spaces.
+   */
+  static formatJson(val: boolean): void {
+    Log.styleJson = val;
   }
 
   /**
@@ -518,45 +538,11 @@ export default class Log {
    */
   private static buildLog(color: () => string, type: enums.ELogTypes, message: unknown): void {
     if (Log.logRules.get(type)) {
-      const shouldLog = Log.logRules.get(type)!(Log.toString(message));
+      const shouldLog = Log.logRules.get(type)!(Utils.toString(message, Log.styleJson));
       if (typeof shouldLog === 'boolean' && shouldLog === false) return;
     }
 
-    console.info(`[${chalk.gray(Log.getDate())}] ${color()} ${Log.toString(message)}`);
-    Log.saveLog(message, type);
-  }
-
-  /**
-   * Save log in files.
-   * @param message Message to save.
-   * @param type Category of log.
-   */
-  private static saveLog(message: unknown, type: enums.ELogTypes): void {
-    const mess = typeof message !== 'string' ? JSON.stringify(message, null, 2) : message;
-    const logger = errLogger(Log.prefix);
-
-    switch (type) {
-      case enums.ELogTypes.Warn:
-        logger.warn(mess);
-        return;
-      case enums.ELogTypes.Error:
-        logger.error(mess);
-        return;
-      case enums.ELogTypes.Debug:
-        logger.debug(mess);
-        return;
-      case enums.ELogTypes.Log:
-      default:
-        logger.info(mess);
-    }
-  }
-
-  /**
-   * Stringify log.
-   * @param message Stringify message to save it.
-   * @returns Stringified log.
-   */
-  private static toString(message: unknown): string {
-    return typeof message !== 'string' ? JSON.stringify(message, null, 2) : message;
+    console.info(`[${chalk.gray(Log.getDate())}] ${color()} ${Utils.toString(message, Log.styleJson)}`);
+    Utils.saveLog(message, type, Log.prefix);
   }
 }
