@@ -36,7 +36,7 @@ export default class Log {
     /**
      * Add spaces to json stringify.
      * Setting this to false will simply stringify logs in files without formatting them to more readable state.
-     * This is usefull, for when you have custom gui for logs like gcp. This will make logs more readable.
+     * This is useful, for when you have custom gui for logs like gcp. This will make logs more readable.
      * Default val: true.
      * @param val Boolean marking if json should include spaces.
      */
@@ -191,6 +191,7 @@ export default class Log {
      * Console.log data from log and push it to function, which saves it.
      * @param color Chalks function, which colours logs.
      * @param type Category of log.
+     * @param header Header to user.
      * @param message Messages to save.
      */
     private static buildLog;

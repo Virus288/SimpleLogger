@@ -79,7 +79,7 @@ export default class Log {
   /**
    * Add spaces to json stringify.
    * Setting this to false will simply stringify logs in files without formatting them to more readable state.
-   * This is usefull, for when you have custom gui for logs like gcp. This will make logs more readable.
+   * This is useful, for when you have custom gui for logs like gcp. This will make logs more readable.
    * Default val: true.
    * @param val Boolean marking if json should include spaces.
    */
@@ -90,7 +90,7 @@ export default class Log {
   /**
    * Create context for logs.
    * Each element in context object will be mapped. Repeating keys will be overwritten. Context can be called multiple times.
-   * Context will be added at the end of each log. This is usefull to group all logs with related target.
+   * Context will be added at the end of each log. This is useful to group all logs with related target.
    * @param context Context to use.
    */
   createContext(context: Record<string, unknown>): void {
@@ -114,7 +114,7 @@ export default class Log {
    */
   error(target: string, ...messages: unknown[]): void {
     messages.forEach((m) => {
-      this.buildLog(() => chalk.red(`Log.ERROR: ${target}`), enums.ELogTypes.Error, m);
+      this.buildLog(() => chalk.red(`Log.ERROR: ${target}`), enums.ELogTypes.Error, target, m);
     });
   }
 
@@ -125,7 +125,7 @@ export default class Log {
    */
   warn(target: string, ...messages: unknown[]): void {
     messages.forEach((m) => {
-      this.buildLog(() => chalk.yellow(`Log.WARN: ${target}`), enums.ELogTypes.Warn, m);
+      this.buildLog(() => chalk.yellow(`Log.WARN: ${target}`), enums.ELogTypes.Warn, target, m);
     });
   }
 
@@ -136,7 +136,7 @@ export default class Log {
    */
   log(target: string, ...messages: unknown[]): void {
     messages.forEach((m) => {
-      this.buildLog(() => chalk.blue(`Log.LOG: ${target}`), enums.ELogTypes.Log, m);
+      this.buildLog(() => chalk.blue(`Log.LOG: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -149,7 +149,7 @@ export default class Log {
   debug(target: string, ...messages: unknown[]): void {
     if (process.env.NODE_ENV === 'production') return;
     messages.forEach((m) => {
-      this.buildLog(() => chalk.magenta(`Log.Debug: ${target}`), enums.ELogTypes.Debug, m);
+      this.buildLog(() => chalk.magenta(`Log.Debug: ${target}`), enums.ELogTypes.Debug, target, m);
     });
   }
 
@@ -162,7 +162,7 @@ export default class Log {
   time(target: string, ...messages: unknown[]): void {
     this.counter.push({ target, start: Date.now() });
     messages.forEach((m) => {
-      this.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, m);
+      this.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -174,7 +174,12 @@ export default class Log {
   endTime(target: string, ...messages: unknown[]): void {
     const localTarget = this.counter.filter((e) => e.target === target);
     if (localTarget.length === 0) {
-      this.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, 'Could not find time start');
+      this.buildLog(
+        () => chalk.bgBlue(`Log.TIME: ${target}`),
+        enums.ELogTypes.Log,
+        target,
+        'Could not find time start',
+      );
     } else {
       this.counter = this.counter.filter(
         (e) => e.target !== localTarget[0]!.target && e.start !== localTarget[0]!.start,
@@ -182,12 +187,13 @@ export default class Log {
       this.buildLog(
         () => chalk.bgBlue(`Log.TIME: ${target}`),
         enums.ELogTypes.Log,
+        target,
         `Time passed: ${((Date.now() - localTarget[0]!.start) / 1000).toFixed(2)}s`,
       );
     }
 
     messages.forEach((m) => {
-      this.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, m);
+      this.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -199,7 +205,7 @@ export default class Log {
   trace(target: string, ...messages: unknown[]): void {
     console.trace(chalk.yellowBright(target));
     messages.forEach((m) => {
-      this.buildLog(() => chalk.yellowBright(`Log.TRACE: ${target}`), enums.ELogTypes.Log, m);
+      this.buildLog(() => chalk.yellowBright(`Log.TRACE: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -207,9 +213,10 @@ export default class Log {
    * Console.log data from log and push it to function, which saves it.
    * @param color Chalks function, which colours logs.
    * @param type Category of log.
+   * @param header Header to use.
    * @param message Messages to save.
    */
-  private buildLog(color: () => string, type: enums.ELogTypes, message: unknown): void {
+  private buildLog(color: () => string, type: enums.ELogTypes, header: string, message: unknown): void {
     if (this.logRules.get(type)) {
       const shouldLog = this.logRules.get(type)!(Utils.toString(message, this.styleJson));
       if (typeof shouldLog === 'boolean' && shouldLog === false) return;
@@ -220,7 +227,7 @@ export default class Log {
       JSON.stringify(this.context),
     );
     let mess = Utils.toString(message, this.styleJson);
-    mess = `${mess} - ${JSON.stringify(this.context)}`;
+    mess = `${header} - ${mess} - ${JSON.stringify(this.context)}`;
     Utils.saveLog(mess, type, this.prefix);
   }
 }

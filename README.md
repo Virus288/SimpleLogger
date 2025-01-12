@@ -29,10 +29,19 @@ Will output data in terminal like this
 
 And save it in logs using winston:
 ```log
-[2024-11-08T18:05:03.311Z] info: I am doing something
+[2024-11-08T18:05:03.311Z] info: Something - I am doing something
 ```
 
-Notice that winston does not save the 'target', but only messages related to it.
+In addition to default logger, there is also contextLogger/clientLogger. This logger is used to log params with context. Its logs will look like this:
+
+```log
+[18:05:03] Log.LOG: Something I am doing something - { contextParam: contextParamValue }
+```
+
+And save it in logs using winston:
+```log
+[2024-11-08T18:05:03.311Z] info: Something - I am doing something - { "contextParam": "contextParamValue" }
+```
 
 ### Log types
 
@@ -249,6 +258,36 @@ async function doSomething() {
 }
 ```
 
+- ClientLogger/ContextLogger
+
+This logger has to be initialized for each request / client, allowing you to "follow" user's actions.
+
+```ts
+import { ClientLog } from 'simpleLogger'
+
+const log = new ClientLog()
+log.createContext({param: val, param2: val2, param3: val2})
+```
+
+Now logging data will result with "context" being attached to each log. Example:
+
+```ts
+log.debug('Something', "I am doing something")
+```
+
+```log
+[18:05:03] Log.LOG: Something I am doing something - { "param": "val", "param2": "val2", "param3": "val2" }
+```
+
+Params can be overwritten on the run. Simply add another context param with the same key as before:
+
+```ts
+log.createContext({param: val5})
+```
+
+> [!TIP]
+> There is no way to overwrite nested keys. In order to do that, overwrite full parent
+
 ### 1.2 Saves logs location
 
 All logs are saved in files.
@@ -275,7 +314,7 @@ Log.setPrefix('test');
 ### 1.3 Prefix in saved logs
 
 Above function will group all logs from your app under folder `test`. Example:
-This app will prioretize env `APP_NAME`. If its not set, `name` in your package.json will be used as your log. Lets say that your `name` is "Authorizations" and APP_NAME is not set
+This app will prioritize env `APP_NAME`. If its not set, `name` in your package.json will be used as your log. Lets say that your `name` is "Authorizations" and APP_NAME is not set
 
 - No prefix set
 ```
