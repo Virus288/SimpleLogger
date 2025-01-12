@@ -38,7 +38,7 @@ export default class Log {
     /**
      * Add spaces to json stringify.
      * Setting this to false will simply stringify logs in files without formatting them to more readable state.
-     * This is usefull, for when you have custom gui for logs like gcp. This will make logs more readable.
+     * This is useful, for when you have custom gui for logs like gcp. This will make logs more readable.
      * Default val: true.
      * @param val Boolean marking if json should include spaces.
      */
@@ -46,7 +46,7 @@ export default class Log {
     /**
      * Create context for logs.
      * Each element in context object will be mapped. Repeating keys will be overwritten. Context can be called multiple times.
-     * Context will be added at the end of each log. This is usefull to group all logs with related target.
+     * Context will be added at the end of each log. This is useful to group all logs with related target.
      * @param context Context to use.
      */
     createContext(context: Record<string, unknown>): void;
@@ -99,6 +99,7 @@ export default class Log {
      * Console.log data from log and push it to function, which saves it.
      * @param color Chalks function, which colours logs.
      * @param type Category of log.
+     * @param header Header to use.
      * @param message Messages to save.
      */
     private buildLog;

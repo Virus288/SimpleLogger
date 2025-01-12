@@ -74,7 +74,7 @@ export default class Log {
   /**
    * Add spaces to json stringify.
    * Setting this to false will simply stringify logs in files without formatting them to more readable state.
-   * This is usefull, for when you have custom gui for logs like gcp. This will make logs more readable.
+   * This is useful, for when you have custom gui for logs like gcp. This will make logs more readable.
    * Default val: true.
    * @param val Boolean marking if json should include spaces.
    */
@@ -89,7 +89,7 @@ export default class Log {
    */
   static error(target: string, ...messages: unknown[]): void {
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.red(`Log.ERROR: ${target}`), enums.ELogTypes.Error, m);
+      Log.buildLog(() => chalk.red(`Log.ERROR: ${target}`), enums.ELogTypes.Error, target, m);
     });
   }
 
@@ -108,7 +108,7 @@ export default class Log {
         const result = await target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.red(`Log.ERROR: ${targetMessage}`), enums.ELogTypes.Error, m);
+          Log.buildLog(() => chalk.red(`Log.ERROR: ${targetMessage}`), enums.ELogTypes.Error, targetMessage, m);
         });
         return result;
       };
@@ -130,7 +130,7 @@ export default class Log {
         const result = target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.red(`Log.ERROR: ${targetMessage}`), enums.ELogTypes.Error, m);
+          Log.buildLog(() => chalk.red(`Log.ERROR: ${targetMessage}`), enums.ELogTypes.Error, targetMessage, m);
         });
         return result;
       };
@@ -144,7 +144,7 @@ export default class Log {
    */
   static warn(target: string, ...messages: unknown[]): void {
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.yellow(`Log.WARN: ${target}`), enums.ELogTypes.Warn, m);
+      Log.buildLog(() => chalk.yellow(`Log.WARN: ${target}`), enums.ELogTypes.Warn, target, m);
     });
   }
 
@@ -163,7 +163,7 @@ export default class Log {
         const result = await target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.yellow(`Log.WARN: ${targetMessage}`), enums.ELogTypes.Warn, m);
+          Log.buildLog(() => chalk.yellow(`Log.WARN: ${targetMessage}`), enums.ELogTypes.Warn, targetMessage, m);
         });
         return result;
       };
@@ -185,7 +185,7 @@ export default class Log {
         const result = target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.yellow(`Log.WARN: ${targetMessage}`), enums.ELogTypes.Warn, m);
+          Log.buildLog(() => chalk.yellow(`Log.WARN: ${targetMessage}`), enums.ELogTypes.Warn, targetMessage, m);
         });
         return result;
       };
@@ -199,7 +199,7 @@ export default class Log {
    */
   static log(target: string, ...messages: unknown[]): void {
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.blue(`Log.LOG: ${target}`), enums.ELogTypes.Log, m);
+      Log.buildLog(() => chalk.blue(`Log.LOG: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -218,7 +218,7 @@ export default class Log {
         const result = await target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.blue(`Log.LOG: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.blue(`Log.LOG: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
         return result;
       };
@@ -240,7 +240,7 @@ export default class Log {
         const result = target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.blue(`Log.LOG: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.blue(`Log.LOG: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
         return result;
       };
@@ -256,7 +256,7 @@ export default class Log {
   static debug(target: string, ...messages: unknown[]): void {
     if (process.env.NODE_ENV === 'production') return;
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.magenta(`Log.Debug: ${target}`), enums.ELogTypes.Debug, m);
+      Log.buildLog(() => chalk.magenta(`Log.Debug: ${target}`), enums.ELogTypes.Debug, target, m);
     });
   }
 
@@ -278,7 +278,7 @@ export default class Log {
         const result = await target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.magenta(`Log.Debug: ${targetMessage}`), enums.ELogTypes.Debug, m);
+          Log.buildLog(() => chalk.magenta(`Log.Debug: ${targetMessage}`), enums.ELogTypes.Debug, targetMessage, m);
         });
         return result;
       };
@@ -303,7 +303,7 @@ export default class Log {
         const result = target.apply(this, args);
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.magenta(`Log.Debug: ${targetMessage}`), enums.ELogTypes.Debug, m);
+          Log.buildLog(() => chalk.magenta(`Log.Debug: ${targetMessage}`), enums.ELogTypes.Debug, targetMessage, m);
         });
         return result;
       };
@@ -319,7 +319,7 @@ export default class Log {
   static time(target: string, ...messages: unknown[]): void {
     Log.counter.push({ target, start: Date.now() });
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, m);
+      Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -331,18 +331,19 @@ export default class Log {
   static endTime(target: string, ...messages: unknown[]): void {
     const localTarget = Log.counter.filter((e) => e.target === target);
     if (localTarget.length === 0) {
-      Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, 'Could not find time start');
+      Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, target, 'Could not find time start');
     } else {
       Log.counter = Log.counter.filter((e) => e.target !== localTarget[0]!.target && e.start !== localTarget[0]!.start);
       Log.buildLog(
         () => chalk.bgBlue(`Log.TIME: ${target}`),
         enums.ELogTypes.Log,
+        target,
         `Time passed: ${((Date.now() - localTarget[0]!.start) / 1000).toFixed(2)}s`,
       );
     }
 
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, m);
+      Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -361,7 +362,7 @@ export default class Log {
         const start = Date.now();
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
 
         const result = await target.apply(this, args);
@@ -369,6 +370,7 @@ export default class Log {
         Log.buildLog(
           () => chalk.bgBlue(`Log.TIME: ${targetMessage}`),
           enums.ELogTypes.Log,
+          targetMessage,
           `Time passed: ${((Date.now() - start) / 1000).toFixed(2)}s`,
         );
         return result;
@@ -394,7 +396,7 @@ export default class Log {
         const start = Date.now();
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
 
         const result = await target.apply(this, args);
@@ -402,6 +404,7 @@ export default class Log {
         Log.buildLog(
           () => chalk.bgBlue(`Log.TIME: ${targetMessage}`),
           enums.ELogTypes.Log,
+          targetMessage,
           `Time passed: ${((Date.now() - start) / 1000).toFixed(2)}s`,
         );
         return result;
@@ -424,7 +427,7 @@ export default class Log {
         const start = Date.now();
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
 
         const result = target.apply(this, args);
@@ -432,6 +435,7 @@ export default class Log {
         Log.buildLog(
           () => chalk.bgBlue(`Log.TIME: ${targetMessage}`),
           enums.ELogTypes.Log,
+          targetMessage,
           `Time passed: ${((Date.now() - start) / 1000).toFixed(2)}s`,
         );
         return result;
@@ -457,7 +461,7 @@ export default class Log {
         const start = Date.now();
 
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.bgBlue(`Log.TIME: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
 
         const result = target.apply(this, args);
@@ -465,6 +469,7 @@ export default class Log {
         Log.buildLog(
           () => chalk.bgBlue(`Log.TIME: ${targetMessage}`),
           enums.ELogTypes.Log,
+          targetMessage,
           `Time passed: ${((Date.now() - start) / 1000).toFixed(2)}s`,
         );
         return result;
@@ -480,7 +485,7 @@ export default class Log {
   static trace(target: string, ...messages: unknown[]): void {
     console.trace(chalk.yellowBright(target));
     messages.forEach((m) => {
-      Log.buildLog(() => chalk.yellowBright(`Log.TRACE: ${target}`), enums.ELogTypes.Log, m);
+      Log.buildLog(() => chalk.yellowBright(`Log.TRACE: ${target}`), enums.ELogTypes.Log, target, m);
     });
   }
 
@@ -498,7 +503,7 @@ export default class Log {
       return async function (this: This, ...args: Args): Promise<Return> {
         console.trace(chalk.yellowBright(target));
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.yellowBright(`Log.TRACE: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.yellowBright(`Log.TRACE: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
 
         const result = await target.apply(this, args);
@@ -521,7 +526,7 @@ export default class Log {
       return function (this: This, ...args: Args): Return {
         console.trace(chalk.yellowBright(target));
         messages.forEach((m) => {
-          Log.buildLog(() => chalk.yellowBright(`Log.TRACE: ${targetMessage}`), enums.ELogTypes.Log, m);
+          Log.buildLog(() => chalk.yellowBright(`Log.TRACE: ${targetMessage}`), enums.ELogTypes.Log, targetMessage, m);
         });
 
         const result = target.apply(this, args);
@@ -534,15 +539,17 @@ export default class Log {
    * Console.log data from log and push it to function, which saves it.
    * @param color Chalks function, which colours logs.
    * @param type Category of log.
+   * @param header Header to user.
    * @param message Messages to save.
    */
-  private static buildLog(color: () => string, type: enums.ELogTypes, message: unknown): void {
+  private static buildLog(color: () => string, type: enums.ELogTypes, header: string, message: unknown): void {
     if (Log.logRules.get(type)) {
       const shouldLog = Log.logRules.get(type)!(Utils.toString(message, Log.styleJson));
       if (typeof shouldLog === 'boolean' && shouldLog === false) return;
     }
 
     console.info(`[${chalk.gray(Log.getDate())}] ${color()} ${Utils.toString(message, Log.styleJson)}`);
-    Utils.saveLog(message, type, Log.prefix);
+    const mess = Utils.toString(message, Log.styleJson);
+    Utils.saveLog(`${header} - ${mess}`, type, Log.prefix);
   }
 }
