@@ -1,8 +1,8 @@
 {
-  "name": "smplLogger",
+  "name": "simpl-loggar",
   "version": "0.5.3",
   "description": "Simple node.js logger",
-  "productName": "smplLogger",
+  "productName": "simpl-loggar",
   "author": "https://github.com/Virus288",
   "license": "Apache-2.0",
   "private": false,
